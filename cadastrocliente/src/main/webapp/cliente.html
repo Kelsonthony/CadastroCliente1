@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cadastro de Clientes</title>
+
+<script src="js/jquery.js"></script>
+<script>
+$(document).ready(function () {
+	
+			
+	carregarClientes();		
+	
+	//Jquery
+	$("#btCancelar").click(function () {
+		limpar();
+	});
+	$("#btSalvar").click(function () {
+		
+		txtId = $("#txtId").val();
+		txtNome = $("#txtNome").val();
+		txtEmail = $("#txtEmail").val();		
+		
+		if (txtId!=""){
+			//Alterar
+				$.ajax({
+					url:'clientes',
+					type:'PUT',
+					dataType:'json',
+					contentType:'application/json;charset=UTF-8',
+					data:JSON.stringify({id:txtId,nome:txtNome,email:txtEmail}),
+					success:function(){
+						window.alert("Alterado com sucesso!");
+						carregarClientes();
+					}
+				});
+			
+		}else{
+			//Cadastrar
+			$.ajax({
+					url:'clientes',
+					type:'POST',
+					dataType:'json',
+					contentType:'application/json;charset=UTF-8',
+					data:JSON.stringify({nome:txtNome,email:txtEmail}),
+					success:function(){
+						window.alert("Salvo com sucesso!");
+						carregarClientes();
+					}
+			});
+						
+		}
+		
+		limpar();
+
+	});
+});
+
+	function excluir(id) {
+		
+		if(window.confirm('Tem certeza que deseja excluir?')){
+			
+			$.ajax({
+				url:'clientes/'+id,
+				type:'DELETE',
+				success:function(){
+					window.alert("Excluído com sucesso!");
+					carregarClientes();
+				}
+			});
+		}
+}
+
+	var dados ={};
+	//Nativo
+	function carregarClientes(){
+		
+		conteudo.innerHTML ="";
+		
+		$.get("clientes", function (objDados, status){
+			dados = objDados;				
+			conteudo = document.getElementById("conteudo");
+			
+			for (i=0; i<objDados.length ; i++){
+				
+				conteudo.innerHTML += objDados[i].id+ " | " + objDados[i].nome + " | " + objDados[i].email;
+				conteudo.innerHTML += "<button onclick='excluir(" + objDados[i].id + ")'>Excluir</button>";
+				conteudo.innerHTML += "<button onclick='editar(" + i + ")'>Editar</button><br>";			
+				
+			}
+			
+		});
+	}
+	
+	function editar(i){
+		$("#txtId").val(dados[i].id);
+		$("#txtNome").val(dados[i].nome);
+		$("#txtEmail").val(dados[i].email);
+	}
+	
+	function limpar(){
+		$("#txtId").val("");
+		$("#txtNome").val("");
+		$("#txtEmail").val("");
+	}
+</script>
+</head>
+	<body>
+	
+		<h1>Cadastro de Clientes</h1>
+		<form>
+			<input type="hidden" id="txtId" />
+		
+			<label>Nome:</label>
+			<input type="text" id="txtNome"/>
+			
+			<label>E-mail:</label>
+			<input type="text" id="txtEmail"/>
+			
+			<input type="button" id="btSalvar" value="Salvar"/>
+			
+			<input type="button" id="btCancelar" value="Cancelar"/>
+			
+			
+		</form>
+		
+			<div id="conteudo">
+				
+			</div>
+		
+	</body>
+</html>
